@@ -1,6 +1,5 @@
 import requests as re
-import xml.etree.cElementTree as ET
-from  xml.parsers.expat import ParserCreate
+from xml.parsers.expat import ParserCreate
 
 class DeafaultSaxHandler(object):
     def __init__(self, provinence):
@@ -38,11 +37,12 @@ def get_provinenc_entry(url):
     parse.Parse(content)
     return province
 
+
 url = 'http://www.ip138.com/post'
 p = get_provinenc_entry(url)
 print(p)
 
-f = open('pro.cvs','w')
+f = open('pro.cvs', 'w')
 
 
 
