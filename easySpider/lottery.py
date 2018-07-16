@@ -1,9 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 import xlwt
-import time
-
-
 
 
 def get_one_page(url):
