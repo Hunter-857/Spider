@@ -2,7 +2,7 @@ import requests as re
 from xml.parsers.expat import ParserCreate
 
 
-class DeafaultSaxHandler(object):
+class DefaultSaxHandler(object):
     def __init__(self, provinence):
         self.provinence = provinence
 
@@ -25,10 +25,9 @@ def get_provinenc_entry(url):
     start = content.find('<map name=\"map_86\" id=\"map_86\">')
     end = content.find('</map>')
     content = content[start:end+len('</map>')].strip()
-    print (content)
-    # province
+    # print (content)
     province = []
-    handler = DeafaultSaxHandler(province)
+    handler = DefaultSaxHandler(province)
     parse = ParserCreate()
 
     parse.StartElementHandler = handler.start_element
@@ -39,11 +38,16 @@ def get_provinenc_entry(url):
     return province
 
 
-url = 'http://www.ip138.com/post'
-p = get_provinenc_entry(url)
-print(p)
+def wirte_to_file(data):
+    f = open('pro.cvs', 'w')
+    for i in range(len(data)):
+        f.writelines(data[i])
+        f.writelines("\n")
 
-f = open('pro.cvs', 'w')
 
-
+if __name__ == '__main__':
+    url = 'http://www.ip138.com/post'
+    data = get_provinenc_entry(url)
+    print(len(data))
+    wirte_to_file(data)
 
