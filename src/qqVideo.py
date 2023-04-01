@@ -3,7 +3,7 @@
 
 import requests as re
 import json
-import re as  regex
+import re as regex
 from tqdm import tqdm
 
 
