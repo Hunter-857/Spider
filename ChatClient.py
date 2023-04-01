@@ -1,19 +1,16 @@
-#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
-# Author: Hurray(hurray0@icloud.com)
-# Date: 2017.05.28
-
 from socket import *
 import json
-from Tkinter import *
+from tkinter import *
+# import tkinter as tk
 import threading
 import ctypes
 import inspect
 import sys
 import struct
 
-reload(sys)
-sys.setdefaultencoding('utf8')
+# reload(sys)
+# sys.setdefaultencoding('utf8')
 
 class R():
     SENDERPORT = 1501
@@ -30,9 +27,9 @@ class Client():
             self.tcpCliSock = socket(AF_INET, SOCK_STREAM)
             self.tcpCliSock.connect(ADDR)
             self.isConnect = True
-            print "连接成功"
+            print("连接成功")
         else:
-            print "已经连接，不再重新连接"
+            print("已经连接，不再重新连接")
 
     def disConnect(self):
         """断开服务器"""
@@ -61,19 +58,19 @@ class Client():
             try:
                 self.father.connect()
             except Exception as e:
-                print e
+                print(e)
                 self.father.showErr("网络连接异常，无法连接服务器")
                 return False
             else:
                 socket = self.father.tcpCliSock
-                socket.send(jData)
+                socket.send(bytes(jData, 'utf-8'))
                 recv_jData = socket.recv(BUFSIZ)
                 recv_data = json.loads(recv_jData)
                 if recv_data["type"] == "login" and \
                         recv_data["username"] == username and \
                         recv_data["status"] == True:
                     # login success!
-                    print "login success"
+                    print("login success")
                     mainFrame = self.father.MainFrame(self.father)
                     loginWindow.destroy()
                     mainFrame.__main__()
@@ -91,15 +88,14 @@ class Client():
             tk.geometry('250x150')
             tk.title('登录界面')
             frame = Frame(tk)
-            frame.pack(expand = YES, fill = BOTH)
+            frame.pack(expand = YES, fill =BOTH)
             Label(frame, font = ("Arial, 15"),
                     text = "请输入一个用户名：", anchor = 'w').pack(padx = 10,
                             pady = 15, fill = 'x')
             entry = Entry(frame)
             entry.pack(padx = 10, fill = 'x')
             entry.bind("<Key-Return>", lambda x : self.goLogin(entry, tk))
-            button = Button(frame, text = "登录",
-                    command = lambda : self.goLogin(entry, tk))
+            button = Button(frame, text = "登录", command = lambda : self.goLogin(entry, tk))
             button.pack()
 
             tk.mainloop()
@@ -130,7 +126,7 @@ class Client():
                         data = json.loads(jData)
                     except:
                         break
-                    print "__receive__" + jData
+                    print("__receive__" + jData)
                     switch = {
                             "list": self.list,
                             "singleChat": self.chat,
@@ -138,7 +134,7 @@ class Client():
                             "pong": self.pong
                             }
                     switch[data['type']](data)
-                print "结束监听"
+                print("结束监听")
 
             def list(self, data):
                 """刷新列表"""
@@ -168,7 +164,7 @@ class Client():
                 self.father = father
 
             def run(self):
-                print '开始监听组播'
+                print( '开始监听组播')
                 self.alive = True
                 sock = self.father.rSocket
                 while self.alive:
@@ -181,8 +177,8 @@ class Client():
                         textArea = self.father.textArea
                         text = "[组播]" + data['from'] + ': ' + data['msg'] + '\n'
                         textArea.insert(END, text)
-                        print "__receiveBroad__" + jData
-                print '组播监听循环结束'
+                        print("__receiveBroad__" + jData)
+                print('组播监听循环结束')
 
             def stop(self):
                 self.alive = False
@@ -203,7 +199,7 @@ class Client():
                         # 停止之前的地址
                         self.father.broadListenThread.stop()
                         self.father.sSocket.sendto("", (R.MYGROUP, R.MYPORT)) # fake send
-                        print '停止之前的地址'
+                        print( '停止之前的地址')
 
                     try:
                         # 发送socket
@@ -231,11 +227,10 @@ class Client():
                         self.father.rSocket = so
 
                     except Exception as e:
-                        print e
+                        print( e)
                         self.father.father.showErr("该地址不可使用")
                     else:
-                        broadListenThread = self.father.BroadListenThread( \
-                                self.father)
+                        broadListenThread = self.father.BroadListenThread(self.father)
                         broadListenThread.start()
                         self.father.broadListenThread = broadListenThread
                         tk.destroy()
@@ -277,9 +272,9 @@ class Client():
                 else:
                     data = {'type': 'broadChat', 'msg': msg, 'from': username}
                     jData = json.dumps(data)
-                    print (R.MYGROUP, R.MYPORT)
+                    print(R.MYGROUP, R.MYPORT)
                     sSocket.sendto(jData, (R.MYGROUP, R.MYPORT))
-                    print '__sendBroad__' + jData
+                    print( '__sendBroad__' + jData)
 
                     # 清空输入框
                     et_input.delete(0, END)
@@ -289,7 +284,7 @@ class Client():
                 text = et_input.get()
                 toName = lb_toName['text']
                 username = self.father.father.username
-                print toName
+                print( toName)
                 if toName == '群聊':
                     data = {'type': 'groupChat', 'msg': text, 'from': username}
                 elif toName == '组播':
@@ -304,7 +299,7 @@ class Client():
                     textArea.insert(END, t)
                 jData = json.dumps(data)
                 socket.send(jData)
-                print '__send__' + jData
+                print( '__send__' + jData)
                 et_input.delete(0, END)
 
             def changeSendTo(self, listbox, lb_toName):
@@ -373,13 +368,13 @@ class Client():
                 tk.mainloop()
 
                 father.socket.shutdown(2)
-                print 'Socket 断开'
+                print('Socket 断开')
                 try:
                     father.broadListenThread.stop()
                     father.sSocket.sendto("", (R.MYGROUP, R.MYPORT)) # fake send
                 except:
                     pass
-                print 'rSocket 断开'
+                print('rSocket 断开')
 
         def __main__(self):
             # 开启监听线程
@@ -388,7 +383,7 @@ class Client():
             self.listenThread = listenThread
 
             # 组播侦听线程
-            #print '开始监听'
+            #print( '开始监听'
             #broadListenThread = self.BroadListenThread(self)
             #broadListenThread.start()
             #self.broadListenThread = broadListenThread
@@ -409,7 +404,7 @@ if __name__ == '__main__':
     global BUFSIZ
     global ADDR
 
-    HOST = '0.0.0.0'
+    HOST = '192.168.1.2'
     PORT = 8945
     BUFSIZ = 1024
     ADDR = (HOST, PORT)

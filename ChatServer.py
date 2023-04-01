@@ -1,8 +1,3 @@
-#/usr/bin/python2.7
-# -*- coding: utf-8 -*-
-# Author: Hurray(hurray0@icloud.com)
-# Date: 2017.05.28
-
 from socket import *
 from time import ctime
 import threading
@@ -43,14 +38,14 @@ class Handle():
         try:
             Handle.usernames.pop(user)
         except Exception as e:
-            print e
+            print(e)
 
     @staticmethod
     def sendSocketToUsers(userList, data):
         jData = json.dumps(data)
         for user in userList:
             user.tcpCliSock.send(jData)
-        print "__sendToAll__" + jData
+        print( "__sendToAll__" + jData)
 
     @staticmethod
     def sendSocketToNames(usernameList, data):
@@ -64,7 +59,7 @@ class Handle():
         """给本用户发送信息包"""
         jData = json.dumps(data)
         self.user.tcpCliSock.send(jData)
-        print '__send__' + jData
+        print( '__send__' + jData)
 
     def login(self, data):
         """处理登录信息包"""
@@ -104,7 +99,7 @@ class Handle():
 
     def logout(self, data):
         """登出"""
-        print "用户"+ Handle.usernames[self.user] +"登出"
+        print( "用户"+ Handle.usernames[self.user] +"登出")
         Handle.delUser(self.user)
 
     def __main__(self, data):
@@ -119,9 +114,9 @@ class Handle():
                 "logout": self.logout
                 }
         try:
-            return switch[type](data)
+            return switch[type](bytes(json.dumps(data), 'utf-8'))
         except Exception as e:
-            print e
+            print(e)
             data['status'] = False
             data['info'] = "未知错误"
             return data
@@ -136,18 +131,21 @@ class ClientThread(threading.Thread):
             handle = Handle(self.user) # handle input
             while True:
                 jData = self.user.tcpCliSock.recv(BUFSIZ)
-                data = json.loads(jData)
-                print "___receive___" + jData
+                jDataStr = bytes.decode(jData)
+                print(jDataStr)
+                print(json.loads(jDataStr))
+                data = json.loads(str(jData, 'utf-8'))
+                # print( "___receive___" + data)
                 if data['type'] == 'logout':
                     break
                 else:
                     handle.__main__(data)
         except Exception as e:
-            print "连接中断"
-            print e
+            print("连接中断")
+            print(e)
         finally:
             name = Handle.usernames[self.user]
-            print "用户"+ str(name) +"登出"
+            print("用户" + str(name) + "登出")
             Handle.delUser(self.user)
             self.user.tcpCliSock.close()
 
@@ -168,16 +166,16 @@ class Server():
 
         while True:
             try:
-                print 'Waiting for connection...'
+                print('Waiting for connection...')
                 tcpCliSock, addr = tcpSerSock.accept()
-                print '...connected from:', addr
+                print('...connected from:', addr)
 
                 user = User(addr, tcpCliSock)
                 clientThread = ClientThread(user)
                 threads += [clientThread]
                 clientThread.start()
             except KeyboardInterrupt:
-                print 'KeyboardInterrupt:'
+                print('KeyboardInterrupt:')
                 for t in threads:
                     t.stop()
                 break
